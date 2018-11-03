@@ -1,0 +1,13 @@
+{
+  "name": "affbot",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "dependencies": {
+    "mongoose": "^5.3.9",
+    "sleep-promise": "^8.0.1",
+    "telegraf": "^3.25.0"
+  }
+}
