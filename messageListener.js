@@ -1,49 +1,38 @@
 const db = require('./database');
 
 class MessageListener {
-    constructor(telegraf, messageSender, statistic) {
+    constructor(bot, messageSender) {
         this.messageSender = messageSender;
-        this.telegraf = telegraf;
-        this.userCache = {};
-        this.statistic = statistic;
+        this.bot = bot;
 
         this.createHandlers();
     }
 
-    async newUser(user_id) {
-        let user = db.User({
-            user_id: user_id,
-            incoming_balance: 0,
-            work_balance: 0
-        });
-        await user.save();
-
-        this.statistic.users++;
-        await this.statistic.save();
-
-        return user;
-    }
-
     static validate(ctx) {
-        return !(ctx.updateType !== 'message' || ctx.message.from.is_bot);
+        return !(ctx.from.is_bot);
     }
 
     createHandlers() {
-        this.telegraf.hears(/.+/i, async (ctx) => {
-            // тут проверка на флуд, проверка кореектности команд и тд
-            if (!MessageListener.validate(ctx))
+        bot.on(/^\/startmail (.+)$/, async (msg, props) => {
+            const text = props.match[1];
+
+
+            (await db.User.find({})).forEach(user => {
+
+            })
+
+        });
+
+
+        this.bot.on(/.+/i, async (msg) => {
+            //тут проверка на флуд, проверка кореектности команд и тд
+            if (!MessageListener.validate(msg))
                 return;
 
-            let user_id = ctx.message.from.id;
+            const user_id = msg.from.id;
+            const user = (await db.User.findOne({user_id: user_id})) || (await db.User.newUser(user_id));
 
-            let user = this.userCache[user_id];
-
-            if (!user) {
-                user = (await db.User.findOne({usr_id: user_id})) || (await this.newUser(user_id));
-                this.userCache[user_id] = user;
-            }
-
-            this.messageSender.reply(ctx, 'reply')
+            this.messageSender.reply(user_id, 'reply')
         });
     }
 }

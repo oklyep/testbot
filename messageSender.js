@@ -1,29 +1,18 @@
+const async = require("async");
+
 class MessageSender {
     constructor(bot) {
         this.bot = bot;
-        this.replyQueue = [];
-        this.mailQeeues = [];
 
-        this.exit = false;
+        this.messageQueue = async.queue(async (task, callback) => {
+            await Promise.all([this.bot.sendMessage(task.user_id, task.text), new Promise((resolve) => setTimeout(resolve, 50))]);
+            callback();
+        });
     }
 
-    reply(ctx, text) {
-        this.replyQueue.push({ctx: ctx, text: text});
-    }
-
-    async startSending() {
-        while (!this.exit || this.replyQueue.length > 0) {
-            let message;
-
-            if (message = this.replyQueue.shift()) {
-                await Promise.all([message.ctx.reply(message.text), new Promise((resolve) => setTimeout(resolve, 50, []))]);
-                continue;
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 300, []));
-        }
+    reply(user_id, text) {
+        this.messageQueue.push({user_id: user_id, text: text});
     }
 }
 
 module.exports = MessageSender;
-//module.exports.default = MessageSender; а надо?

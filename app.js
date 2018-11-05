@@ -1,29 +1,26 @@
-const Telegraf = require('telegraf');
+const Telebot = require('telebot');
 const MessageSender = require('./messageSender.js');
 const MessageListener = require('./messageListener.js');
 const db = require('./database.js');
 
-const telegraf = new Telegraf('799854495:AAEJkEIUO3BPJUJMzDdKOVhPynkfhVDWHWw'); // todo
-const sender = new MessageSender(telegraf);
-
-let sending;
+const bot = new Telebot('799854495:AAEJkEIUO3BPJUJMzDdKOVhPynkfhVDWHWw');
+const sender = new MessageSender(bot);
 
 async function main() {
     let statistic = (await db.Statistic.findOne({})) || (await db.Statistic.create({}));
-    let listener = new MessageListener(telegraf, sender, statistic);
+    let listener = new MessageListener(bot, sender);
 
-    telegraf.startPolling();
-    sending = sender.startSending();
+    bot.start();
+    //sending = sender.startSending();
 }
 
 process.stdin.resume();
 
 async function exitHandler(){
-    telegraf.stop();
-    console.log('polling stopped');
-    sender.exit = true;
-    await sending;
-    console.log('bot stopped successfully');
+    bot.stop();
+    //await sending;
+    await new Promise((resolve) => sender.messageQueue.drain = resolve);
+    console.log('[sender.info] sending stopped');
     process.exit();
 }
 

@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "mongoose": "^5.3.9",
-    "sleep-promise": "^8.0.1",
-    "telegraf": "^3.25.0"
+    "telebot": "^1.2.6",
+    "async": "latest"
   }
 }
