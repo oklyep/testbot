@@ -1,10 +1,10 @@
-const sleep = require('sleep-promise');
-
 class MessageSender {
     constructor(bot) {
         this.bot = bot;
         this.replyQueue = [];
         this.mailQeeues = [];
+
+        this.exit = false;
     }
 
     reply(ctx, text) {
@@ -12,15 +12,15 @@ class MessageSender {
     }
 
     async startSending() {
-        while (true) {
+        while (!this.exit || this.replyQueue.length > 0) {
             let message;
 
             if (message = this.replyQueue.shift()) {
-                await Promise.all([message.ctx.reply(message.text), sleep(50)]);
+                await Promise.all([message.ctx.reply(message.text), new Promise((resolve) => setTimeout(resolve, 50, []))]);
                 continue;
             }
 
-            await sleep(500);
+            await new Promise((resolve) => setTimeout(resolve, 300, []));
         }
     }
 }
